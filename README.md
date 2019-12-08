@@ -5,4 +5,6 @@ The goal is for completion rather than perfection, but all advice towards perfec
 
 All code in this repository is functional based on the inputs received for my individual days.
 
+Feel free to use whatever you see fit from the repository.
+
 Enjoy!

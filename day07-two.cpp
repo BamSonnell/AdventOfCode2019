@@ -74,7 +74,7 @@ void runAmplifier(vector<int>& inputVector) {
 	vector<intCodeInstance> instanceQueue(5);
 	vector<int> maxRef;
 	int permutations[] = { 5, 6, 7, 8, 9 }, i, maxThrust;
-	while (next_permutation(permutations, permutations + 5)) {
+	while (next_permutation(permutations, permutations + sizeof(permutations)/sizeof(int))) {
 		i = 0;
 		maxThrust = 0;
 		for (const auto& ptr : permutations) { // Sets all values needed for input into the computer. Sets the intial permutation bit in the first slot of the input vector in the intCodeInstance class.

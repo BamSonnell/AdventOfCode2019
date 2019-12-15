@@ -86,7 +86,7 @@ void runAmplifier(vector<int>& inputVector) {
 				instanceQueue[i].input.push_back(maxThrust);
 				computer(instanceQueue[i]);
 				maxThrust = instanceQueue[i].output[instanceQueue[i].output.size() -1];
-				instanceQueue[i++].input.pop_back(); // Removes previous input into the computer to make room for the next entry.
+				instanceQueue[i++].input.clear(); // Removes previous input into the computer to make room for the next entry.
 			}
 		}
 		// cout << maxThrust << endl;

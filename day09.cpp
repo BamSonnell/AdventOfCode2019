@@ -14,29 +14,29 @@
 #include <chrono>
 #include <algorithm>
 
-#define INPUT_TYPE long long int
+#define INPUT_TYPE int64_t
 #define BREAK_CHAR ','
 
 using namespace std;
 
 class intCodeInstance { // Class used to hold all values for a register during the pause phase. Reset for each pass through the permutations.
 public:
-	vector<long long int> memory;
-	vector<long long int> input;
-	vector<long long int> output;
+	vector<int64_t> memory;
+	vector<int64_t> input;
+	vector<int64_t> output;
 	int pos;
 	int relativePos;
 };
 
 void fileInput(vector<INPUT_TYPE>& inputVector, ifstream& in);
 vector<int> returnMode(int mode);
-vector<long long int> memory_allocate(vector<long long int>& inputVector);
+vector<int64_t> memory_allocate(vector<int64_t>& inputVector);
 int returnValue(vector<int> mode, int i);
 void computer(intCodeInstance& instance);
-void buildInstance(intCodeInstance& ptr, vector<long long int>& memory, int permutationRef);
-void runComputer(vector<long long int>& inputVector);
-long long int returnSetValue(vector<int>& modeRef, int increment, vector<long long int>& memory, int pos, int relativePos);
-long long int bigNumberMult(int a, int b);
+void buildInstance(intCodeInstance& ptr, vector<int64_t>& memory, int permutationRef);
+void runComputer(vector<int64_t>& inputVector);
+int64_t returnSetValue(vector<int>& modeRef, int increment, vector<int64_t>& memory, int pos, int relativePos);
+void addtoMemory(vector<int64_t>& memory, vector<int>& modeRef, int inputValue, int relativePos, int pos, int increment);
 
 int main(void) {
 	ifstream in;
@@ -51,29 +51,26 @@ int main(void) {
 		exit(EXIT_FAILURE);
 	}
 
-	
+
 
 	fileInput(inputVector, in);
-	// long long int big = 34915192 * 30000000;
-	// cout << big;
-	// bigNumberMult(10001,10001);
 	runComputer(inputVector);
 }
 
-void runComputer(vector<long long int>& inputVector) {
+void runComputer(vector<int64_t>& inputVector) {
 	int i = 0;
 	intCodeInstance instance;
-	buildInstance(instance, inputVector, 3); // First = instance being built. Second = stream of memory to be copied to instance. Third = input value for start
+	buildInstance(instance, inputVector, 1); // First = instance being built. Second = stream of memory to be copied to instance. Third = input value for start
 	computer(instance);
-	while (instance.output[i] != 0) {
-		cout << instance.output[i++] << endl;
+	for (const auto& ptr : instance.output) {
+		cout << ptr << endl;
 	}
 }
 
 void fileInput(vector<INPUT_TYPE>& inputVector, ifstream& in) { // Inputs lines from input into string vector
 	string IO;
 	while (getline(in, IO, BREAK_CHAR)) {
-		inputVector.push_back(stoull(IO));
+		inputVector.push_back(stoll(IO));
 	}
 }
 
@@ -86,14 +83,14 @@ vector<int> returnMode(int mode) { // Returns a vector with the bits of the mode
 	return modeStorage;
 }
 
-vector<long long int> memory_allocate(vector<long long int>& inputVector) { // Copies memory into seperate vector to run on each machine. Allocates 2x the memory provided.
-	vector<long long int> copy(inputVector.begin(), inputVector.end());
+vector<int64_t> memory_allocate(vector<int64_t>& inputVector) { // Copies memory into seperate vector to run on each machine. Allocates 2x the memory provided.
+	vector<int64_t> copy(inputVector.begin(), inputVector.end());
 	copy.resize(copy.size() * 400); // Set back to two for day nine
 
 	return copy;
 }
 
-void buildInstance(intCodeInstance& ptr, vector<long long int>& memory, int permutationRef) { // Called to reset the values so no carryover is observed between trials of permutations
+void buildInstance(intCodeInstance& ptr, vector<int64_t>& memory, int permutationRef) { // Called to reset the values so no carryover is observed between trials of permutations
 	ptr.pos = NULL;
 	ptr.input.clear();
 	ptr.output.clear();
@@ -101,7 +98,7 @@ void buildInstance(intCodeInstance& ptr, vector<long long int>& memory, int perm
 	ptr.memory = memory_allocate(memory);
 }
 
-int returnValue(vector<int> mode, int i) { // Checks if computation should be done by reference of value
+int returnValue(vector<int> mode, int i) { // Checks if computation should be done by reference or value
 	if (mode[i] == 1) {
 		return 1;
 	}
@@ -113,10 +110,10 @@ int returnValue(vector<int> mode, int i) { // Checks if computation should be do
 	}
 }
 
-long long int returnSetValue(vector<int>& modeRef, int increment, vector<long long int>& memory, int pos, int relativePos) {
+int64_t returnSetValue(vector<int>& modeRef, int increment, vector<int64_t>& memory, int pos, int relativePos) {
 	int refMode = returnValue(modeRef, increment);
-	int unsignedRef;
-	long long int value = 0;
+	int64_t unsignedRef;
+	int64_t value = 0;
 	if (refMode == 0) {
 		value = memory[memory[pos + (increment - 1)]];
 	}
@@ -131,40 +128,44 @@ long long int returnSetValue(vector<int>& modeRef, int increment, vector<long lo
 	return value;
 }
 
-long long int bigNumberMult(int a, int b) {
-	
-	return 0;
+void addtoMemory(vector<int64_t>& memory, vector<int>& modeRef, int inputValue, int relativePos, int pos, int increment) {
+	int refMode = returnValue(modeRef, increment);
+	if (refMode == 2) {
+		memory[relativePos + memory[pos + (increment - 1)]] = inputValue;
+	}
+	else if (refMode == 0) {
+		memory[memory[pos + (increment - 1)]] = inputValue;
+	}
 }
 
 void computer(intCodeInstance& instance) {
 	vector<int> modeRef;
 	instance.pos = 0;
 	instance.relativePos = 0;
-	int a, b, c, inputNum = 0, intPos;
+	int64_t a, b, c, inputNum = 0, intPos;
 	while (instance.memory[instance.pos] != 99) {
 		modeRef = returnMode(instance.memory[instance.pos]);
-		/*for (const auto& ptr : instance.memory) {
+		for (const auto& ptr : modeRef) {
 			cout << ptr << " ";
 		}
-		cout << endl;*/
+		cout << endl;
 		switch (modeRef[0]) {
 		case 1: // ADD
 			a = returnSetValue(modeRef, 2, instance.memory, instance.pos, instance.relativePos);
 			b = returnSetValue(modeRef, 3, instance.memory, instance.pos, instance.relativePos);
-			c = instance.memory[instance.pos + 3];
-			instance.memory[c] = long long int(a) + long long int(b);
+			c = returnSetValue(modeRef, 4, instance.memory, instance.pos, instance.relativePos);
+			instance.memory[c] = int64_t(a) + int64_t(b);
 			instance.pos += 4;
 			break;
 		case 2: // MULTIPLY
 			a = returnSetValue(modeRef, 2, instance.memory, instance.pos, instance.relativePos);
 			b = returnSetValue(modeRef, 3, instance.memory, instance.pos, instance.relativePos);
-			c = instance.memory[instance.pos + 3];
-			instance.memory[c] = long long int(a) * long long int(b);
-			cout << instance.memory[c];
+			c = returnSetValue(modeRef, 4, instance.memory, instance.pos, instance.relativePos);
+			instance.memory[c] = int64_t(a) * int64_t(b);
 			instance.pos += 4;
 			break;
 		case 3: // INPUT
-			instance.memory[instance.memory[instance.pos + 1]] = instance.input[inputNum++];
+			addtoMemory(instance.memory, modeRef, instance.input[inputNum++], instance.relativePos, instance.pos, 2);
 			instance.pos += 2;
 			break;
 		case 4: // OUTPUT
@@ -192,14 +193,14 @@ void computer(intCodeInstance& instance) {
 		case 7: // LESS THAN
 			a = returnSetValue(modeRef, 2, instance.memory, instance.pos, instance.relativePos);
 			b = returnSetValue(modeRef, 3, instance.memory, instance.pos, instance.relativePos);
-			c = instance.memory[instance.pos + 3];
+			c = returnSetValue(modeRef, 4, instance.memory, instance.pos, instance.relativePos);
 			(a < b) ? instance.memory[c] = 1 : instance.memory[c] = 0;
 			instance.pos += 4;
 			break;
 		case 8: // EQUALS
 			a = returnSetValue(modeRef, 2, instance.memory, instance.pos, instance.relativePos);
 			b = returnSetValue(modeRef, 3, instance.memory, instance.pos, instance.relativePos);
-			c = instance.memory[instance.pos + 3];
+			c = returnSetValue(modeRef, 4, instance.memory, instance.pos, instance.relativePos);
 			(a == b) ? instance.memory[c] = 1 : instance.memory[c] = 0;
 			instance.pos += 4;
 			break;

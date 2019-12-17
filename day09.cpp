@@ -37,6 +37,7 @@ void buildInstance(intCodeInstance& ptr, vector<int64_t>& memory, int permutatio
 void runComputer(vector<int64_t>& inputVector);
 int64_t returnSetValue(vector<int>& modeRef, int increment, vector<int64_t>& memory, int pos, int relativePos);
 void addtoMemory(vector<int64_t>& memory, vector<int>& modeRef, int inputValue, int relativePos, int pos, int increment);
+int storageInput(vector<int64_t>& memory, int64_t modeRef, int relativePos, int pos, int increment);
 
 int main(void) {
 	ifstream in;
@@ -60,7 +61,7 @@ int main(void) {
 void runComputer(vector<int64_t>& inputVector) {
 	int i = 0;
 	intCodeInstance instance;
-	buildInstance(instance, inputVector, 1); // First = instance being built. Second = stream of memory to be copied to instance. Third = input value for start
+	buildInstance(instance, inputVector, 2); // First = instance being built. Second = stream of memory to be copied to instance. Third = input value for start
 	computer(instance);
 	for (const auto& ptr : instance.output) {
 		cout << ptr << endl;
@@ -138,29 +139,42 @@ void addtoMemory(vector<int64_t>& memory, vector<int>& modeRef, int inputValue, 
 	}
 }
 
+int storageInput(vector<int64_t>& memory, int64_t modeRef, int relativePos, int pos, int increment) {
+	if (modeRef == 2) {
+		return relativePos + memory[pos + (increment - 1)];
+	}
+	else if (modeRef == 1) {
+		return pos + (increment - 1);
+	}
+	else {
+		return memory[pos + (increment - 1)];
+	}
+}
+
 void computer(intCodeInstance& instance) {
 	vector<int> modeRef;
+	int i = 0;
 	instance.pos = 0;
 	instance.relativePos = 0;
 	int64_t a, b, c, inputNum = 0, intPos;
 	while (instance.memory[instance.pos] != 99) {
 		modeRef = returnMode(instance.memory[instance.pos]);
-		for (const auto& ptr : modeRef) {
+		/*for (const auto& ptr : modeRef) {
 			cout << ptr << " ";
 		}
-		cout << endl;
+		cout << endl;*/
 		switch (modeRef[0]) {
 		case 1: // ADD
 			a = returnSetValue(modeRef, 2, instance.memory, instance.pos, instance.relativePos);
 			b = returnSetValue(modeRef, 3, instance.memory, instance.pos, instance.relativePos);
-			c = returnSetValue(modeRef, 4, instance.memory, instance.pos, instance.relativePos);
+			c = storageInput(instance.memory, returnValue(modeRef, 4), instance.relativePos, instance.pos, 4);
 			instance.memory[c] = int64_t(a) + int64_t(b);
 			instance.pos += 4;
 			break;
 		case 2: // MULTIPLY
 			a = returnSetValue(modeRef, 2, instance.memory, instance.pos, instance.relativePos);
 			b = returnSetValue(modeRef, 3, instance.memory, instance.pos, instance.relativePos);
-			c = returnSetValue(modeRef, 4, instance.memory, instance.pos, instance.relativePos);
+			c = storageInput(instance.memory, returnValue(modeRef, 4), instance.relativePos, instance.pos, 4);
 			instance.memory[c] = int64_t(a) * int64_t(b);
 			instance.pos += 4;
 			break;
@@ -193,14 +207,14 @@ void computer(intCodeInstance& instance) {
 		case 7: // LESS THAN
 			a = returnSetValue(modeRef, 2, instance.memory, instance.pos, instance.relativePos);
 			b = returnSetValue(modeRef, 3, instance.memory, instance.pos, instance.relativePos);
-			c = returnSetValue(modeRef, 4, instance.memory, instance.pos, instance.relativePos);
+			c = storageInput(instance.memory, returnValue(modeRef, 4), instance.relativePos, instance.pos, 4);
 			(a < b) ? instance.memory[c] = 1 : instance.memory[c] = 0;
 			instance.pos += 4;
 			break;
 		case 8: // EQUALS
 			a = returnSetValue(modeRef, 2, instance.memory, instance.pos, instance.relativePos);
 			b = returnSetValue(modeRef, 3, instance.memory, instance.pos, instance.relativePos);
-			c = returnSetValue(modeRef, 4, instance.memory, instance.pos, instance.relativePos);
+			c = storageInput(instance.memory, returnValue(modeRef, 4), instance.relativePos, instance.pos, 4);
 			(a == b) ? instance.memory[c] = 1 : instance.memory[c] = 0;
 			instance.pos += 4;
 			break;

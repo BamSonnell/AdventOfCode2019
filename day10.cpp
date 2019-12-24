@@ -48,10 +48,10 @@ int main(void) {
 		cout << ptr << endl;
 	}
 	cout << endl;
-	for (const auto& ptr : locations) {
+	/*for (const auto& ptr : locations) {
 		cout << "x = " << get<0>(ptr) << "   y = " << get<1>(ptr) << endl;
 	}
-	cout << endl;
+	cout << endl;*/
 
 	double maxObserved = findAsteriod(locations);
 	cout << "Best location observes " << maxObserved << " asteriods" << endl;
@@ -87,23 +87,23 @@ double findAsteriod(vector<tuple<double, double>>& locations) {
 		slopeSet.clear();
 		x1 = get<0>(ptr);
 		y1 = get<1>(ptr);
-		cout << get<0>(ptr) << " " << get<1>(ptr) << endl << endl;
+		//cout << get<0>(ptr) << " " << get<1>(ptr) << endl << endl;
 		for (const auto& ptr2 : locations) {
 			x2 = get<0>(ptr2);
 			y2 = get<1>(ptr2);
 			dx = x2 - x1;
 			dy = y2 - y1;
-			GCD = gcd(dx, dy);
+			GCD = gcd(abs(dx), abs(dy));
 			if (dx == 0 && dy == 0) {
 				continue;
 			}
 			else {
 				slopeSet.insert(make_tuple(dx / GCD, dy/ GCD));
 			}
-			cout << get<0>(ptr2) << " " << get<1>(ptr2) << " " << ((dx != 0) ? dy / dx : 0) << endl;
+			//cout << get<0>(ptr2)/GCD << " " << get<1>(ptr2)/GCD << " " << ((dx != 0) ? dy / dx : 0) << endl;
 		}
 		slopeSize.push_back(slopeSet.size());
-		cout << endl;
+		//cout << endl;
 	}
 	for (const auto& ptr : slopeSize) {
 		if (maxObserved == 0) maxObserved = ptr;
